@@ -1,4 +1,4 @@
-package tui_file_picker
+package tuifilepicker
 
 import (
 	"github.com/gdamore/tcell/v2"
