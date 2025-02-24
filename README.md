@@ -2,6 +2,8 @@
 
 Simple file picker through Terminal User Interface.
 
+![](doc/tuifp.gif)
+
 ### Install
 
 ```
