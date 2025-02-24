@@ -7,7 +7,7 @@ Simple file picker through Terminal User Interface.
 ### Install
 
 ```
-go get github.com/fetaro/tuifp
+go get github.com/fetaro/tuifp@v1.0.0
 ```
 
 ### Sample
