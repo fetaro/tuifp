@@ -43,6 +43,7 @@ func (f *TuiFilePicker) Pick() (string, error) {
 	var err error
 	app := tview.NewApplication()
 
+	// UI components
 	f.listView = tview.NewList().
 		ShowSecondaryText(false).
 		SetSelectedFocusOnly(true)
@@ -50,7 +51,6 @@ func (f *TuiFilePicker) Pick() (string, error) {
 	f.headerView = tview.NewFlex()
 	f.infoView = tview.NewTextView()
 
-	// button
 	button := tview.NewButton(".. <parent dir>")
 	button.Box = tview.NewBox()
 	button.SetSelectedFunc(func() {
@@ -58,7 +58,7 @@ func (f *TuiFilePicker) Pick() (string, error) {
 	})
 	f.headerView.AddItem(button, 16, 0, true)
 
-	// UI組み立て
+	// build UI
 	pages := tview.NewPages()
 	body := tview.NewFlex().SetDirection(tview.FlexRow).AddItem(f.listView, 0, 1, true)
 	splitterView := tview.NewTextView().SetText("----------------------------")
@@ -70,7 +70,7 @@ func (f *TuiFilePicker) Pick() (string, error) {
 		AddItem(f.footerView, 1, 0, false)
 	pages.AddPage("main", mainFlex, true, true)
 
-	// ボタンから下に行ったらリストにフォーカス
+	// if down pressed on header
 	f.headerView.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyDown:
@@ -80,7 +80,7 @@ func (f *TuiFilePicker) Pick() (string, error) {
 		return event
 	})
 
-	// リストから上に行ったらボタンにフォーカス
+	// if up pressed on body
 	body.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyUp:
@@ -91,6 +91,8 @@ func (f *TuiFilePicker) Pick() (string, error) {
 		}
 		return event
 	})
+
+	// if q pressed
 	pages.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyRune:
@@ -102,6 +104,7 @@ func (f *TuiFilePicker) Pick() (string, error) {
 		return event
 	})
 
+	// if item selected
 	f.listView.SetSelectedFunc(func(index int, selectedStr string, secondary string, code rune) {
 		f.infoView.SetText("Selected: " + selectedStr)
 		if strings.HasSuffix(selectedStr, "/") {
@@ -111,6 +114,10 @@ func (f *TuiFilePicker) Pick() (string, error) {
 			app.Stop()
 		}
 	})
+
+	// -------------------
+	// main
+	// -------------------
 	// get current directory and Show
 	dir, err := os.Getwd()
 	if err != nil {
