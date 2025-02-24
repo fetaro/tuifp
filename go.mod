@@ -1,4 +1,4 @@
-module github.com/fetaro/tuifilepicker
+module github.com/fetaro/tuifp
 
 go 1.21
 
