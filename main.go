@@ -4,7 +4,6 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -39,7 +38,7 @@ func (f *TuiFilePicker) changeDir(dir string) error {
 	f.infoView.SetText("current dir: " + dir)
 	return nil
 }
-func (f *TuiFilePicker) Pick() (string, error) {
+func (f *TuiFilePicker) Pick(startDir string) (string, error) {
 	var err error
 	app := tview.NewApplication()
 
@@ -54,7 +53,10 @@ func (f *TuiFilePicker) Pick() (string, error) {
 	button := tview.NewButton(".. <parent dir>")
 	button.Box = tview.NewBox()
 	button.SetSelectedFunc(func() {
-		f.changeDir(filepath.Dir(f.currentPath))
+		err = f.changeDir(filepath.Dir(f.currentPath))
+		if err != nil {
+			app.Stop()
+		}
 	})
 	f.headerView.AddItem(button, 16, 0, true)
 
@@ -72,8 +74,7 @@ func (f *TuiFilePicker) Pick() (string, error) {
 
 	// if down pressed on header
 	f.headerView.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch event.Key() {
-		case tcell.KeyDown:
+		if event.Key() == tcell.KeyDown {
 			app.SetFocus(f.listView)
 			return nil
 		}
@@ -82,8 +83,7 @@ func (f *TuiFilePicker) Pick() (string, error) {
 
 	// if up pressed on body
 	body.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch event.Key() {
-		case tcell.KeyUp:
+		if event.Key() == tcell.KeyUp {
 			if f.listView.GetCurrentItem() == 0 {
 				app.SetFocus(button)
 				return nil
@@ -94,8 +94,7 @@ func (f *TuiFilePicker) Pick() (string, error) {
 
 	// if q pressed
 	pages.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch event.Key() {
-		case tcell.KeyRune:
+		if event.Key() == tcell.KeyRune {
 			switch event.Rune() {
 			case 'q':
 				app.Stop()
@@ -118,14 +117,10 @@ func (f *TuiFilePicker) Pick() (string, error) {
 	// -------------------
 	// main
 	// -------------------
-	// get current directory and Show
-	dir, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	err = f.changeDir(dir)
+	err = f.changeDir(startDir)
 
-	if err := app.SetRoot(pages, true).Run(); err != nil {
+	err = app.SetRoot(pages, true).Run()
+	if err != nil {
 		return "", err
 	}
 	return f.selectedPath, nil
